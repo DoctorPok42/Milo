@@ -1,0 +1,20 @@
+{
+  "name": "milo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "milo": "node build/index.js",
+    "build": "node build.js"
+  },
+  "author": "DoctorPok",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "dotenv": "^17.2.1",
+    "enquirer": "^2.4.1",
+    "groq-sdk": "^0.29.0",
+    "nanospinner": "^1.2.2",
+    "typescript": "^5.8.3"
+  }
+}

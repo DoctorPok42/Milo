@@ -1,0 +1,14 @@
+services:
+  app:
+    image: doctorpok/whatsup:milo
+    container_name: milo
+    restart: unless-stopped
+    network_mode: bridge
+    command: ["sh", "-c", "npm run build && tail -f /dev/null"]
+    volumes:
+      - ./skills:/app/src/skills
+    environment:
+      - GROQ_API_KEY=your_api_key_here
+
+volumes:
+  skills:
