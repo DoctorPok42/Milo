@@ -70,7 +70,7 @@ Milo will automatically detect and register the new skill.
 
 - [ ] Add more built-in skills.
 - [ ] Implement a small REST API to interact with Milo.
-- [ ] Change LLM response by streaming the response to the client.
+- [x] Change LLM response by streaming the response to the client.
 
 ## Contributing
 

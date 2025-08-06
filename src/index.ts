@@ -6,7 +6,7 @@ import getSkills from "./core/getSkills";
 import { Skills } from "./types";
 import { prompt } from "enquirer";
 import { createSpinner } from "nanospinner";
-import makeResponse from "./llm/reponse";
+import { getGroqChat, getGroqChatWithSkillResponse } from "./llm/reponse";
 
 config({ quiet: true }); // Load environment variables from .env file
 
@@ -36,36 +36,58 @@ const startMilo = async () => {
       break;
     }
 
+    let spinner;
+
     try {
       if (userInput.userMessage.trim().toLowerCase() === "exit") {
         console.log("Exiting...");
         break;
       }
 
-      const spinner = createSpinner("Processing your request...").start();
+      spinner = createSpinner("Processing your request...").start();
 
       // Process the user input with the core function
-      const responses = (await core({
+      const responses = ((await core({
         userMessage: userInput.userMessage,
         skills,
-      })) as string | null;
+      })) as unknown) as string | null;
 
       // Ask the LLM to generate a response based on the responses and skills
-      const llmResponse = await makeResponse({
-        userRequest: userInput.userMessage,
-        response: responses,
-        systemPrompt,
-      });
+      let llmResponse;
+
+      if (responses === "null") {
+        llmResponse = await getGroqChat(userInput.userMessage, systemPrompt);
+      } else if (responses) {
+        llmResponse = await getGroqChatWithSkillResponse(
+          userInput.userMessage,
+          responses,
+          systemPrompt
+        );
+      }
 
       spinner.clear();
       spinner.stop();
 
-      console.info(
-        "\x1b[1;34mMilo's response:\x1b[0m",
-        llmResponse || "No response from Milo."
-      );
+      process.stdout.write("\x1b[1;34mMilo's response:\x1b[0m ");
+
+      // Stream the response from the LLM
+      for await (const message of llmResponse as AsyncIterable<any>) {
+        const content = message.choices[0]?.delta?.content;
+        if (!content || content.trim() === "") continue;
+
+        process.stdout.write(content);
+      }
+
+      process.stdout.write("\n");
+
     } catch (error) {
-      console.error("Error:", error);
+      spinner?.clear();
+      spinner?.stop();
+      console.error(
+        "\x1b[1;31mAn error occurred while processing your request.\x1b[0m",
+        error instanceof Error ? error.message : "Unknown error"
+      );
+      process.stdout.write("\n");
     }
   }
 };

@@ -1,35 +1,6 @@
 import { groq } from "..";
-import { Skills } from "../types";
 
-interface ResponseProps {
-  userRequest: string;
-  response: string | null;
-  systemPrompt: string;
-}
-
-const makeResponse = async ({
-  userRequest,
-  response,
-  systemPrompt,
-}: ResponseProps) => {
-  if (response === "null") {
-    const groqResponse = await getGroqChat(userRequest, systemPrompt);
-
-    return groqResponse.choices[0].message.content;
-  } else if (response) {
-    const groqResponse = await getGroqChatWithSkillResponse(
-      userRequest,
-      response,
-      systemPrompt
-    );
-
-    return groqResponse.choices[0].message.content;
-  }
-};
-
-export default makeResponse;
-
-const getGroqChat = async (message: string, systemPrompt: string) => {
+export const getGroqChat = async (message: string, systemPrompt: string) => {
   return groq.chat.completions.create({
     messages: [
       {
@@ -43,11 +14,11 @@ const getGroqChat = async (message: string, systemPrompt: string) => {
     ],
 
     model: "llama-3.3-70b-versatile",
-    // stream: true,
+    stream: true,
   });
 };
 
-const getGroqChatWithSkillResponse = async (
+export const getGroqChatWithSkillResponse = async (
   message: string,
   response: any,
   systemPrompt: string
@@ -70,6 +41,6 @@ const getGroqChatWithSkillResponse = async (
     ],
 
     model: "llama-3.3-70b-versatile",
-    // stream: true,
+    stream: true,
   });
 };
